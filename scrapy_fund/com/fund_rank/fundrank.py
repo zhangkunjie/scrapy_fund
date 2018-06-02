@@ -2,6 +2,7 @@
 import urllib.request
 import pymysql
 from scrapy_fund.com.constant import constant
+from scrapy_fund.com.utils import utils
 
 
 # 获取的增长率为空转为0
@@ -56,22 +57,11 @@ def save_fund(data_array, category):
     conn.close()  # 释放数据库资源
 
 
-def truncate_table(table_name):
-    conn = pymysql.connect(host=constant.HOST, user=constant.USER, passwd=constant.PASSWORD, db=constant.DB,
-                           port=constant.PORT, charset=constant.CHARSET)
-    truncateSQL = "truncate " + table_name;
-    cur = conn.cursor()
-    cur.execute(truncateSQL)
-    conn.commit()
-    cur.close()  # 关闭游标
-    conn.close()  # 释放数据库资源
-
-
 # 开始组合函数
 public_url = constant.FUNRRANK_URL
 fund_category = constant.FUND_CATEGORY
 # 清空表
-truncate_table("fund_rank")
+utils.truncate_table("fund_rank")
 # 插入抓取的数据
 for category in fund_category:
     fund_url = public_url + category
