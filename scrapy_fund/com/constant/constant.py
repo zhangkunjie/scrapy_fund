@@ -13,12 +13,12 @@ class constant:
 import sys
 
 sys.modules[__name__] = constant()
-constant.FUNRRANK_URL= 'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&pi=1&pn=10000&dx=0&ft='
 constant.HOST = 'localhost'
 constant.USER= 'root'
-constant.PASSWORD= 'mysql'
+constant.PASSWORD= '!PPxy168891'
 constant.DB= 'test'
 constant.PORT= 3306
 constant.CHARSET= 'utf8'
-constant.FUND_CATEGORY= ['gp','hh','zq','zs','bb','qdii','lof']
-constant.FUNRRANK_URL= 'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&pi=1&pn=10000&dx=0&ft='
+constant.FUND_CATEGORY= ['gp','hh','zq','zs','bb','qdii','lof','fof']
+constant.FUNRRANK_URL= 'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&pi=1&pn=10000&dx=1&ft='
+constant.MANAGER_URL= 'http://fund.eastmoney.com/Data/FundDataPortfolio_Interface.aspx?dt=14&mc=returnjson&ft=all&st=asc'
