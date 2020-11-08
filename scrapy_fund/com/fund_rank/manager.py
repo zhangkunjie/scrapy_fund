@@ -12,11 +12,9 @@ from scrapy_fund.com.utils import utils
 
 def clean_data(data):
     if data == '':
-        return  "'--'"
+        return  "--"
     else:
-        return "'" + data.strip('%') + "'"
-
-
+        return  data.strip('%')
 # 通过传入的地址参数获取接口数据
 def get_data_array(url):
     header={
@@ -38,6 +36,8 @@ def save_fund(data_array):
     conn = pymysql.connect(host=constant.HOST, user=constant.USER, passwd=constant.PASSWORD, db=constant.DB,
                            port=constant.PORT, charset=constant.CHARSET)
     cur = conn.cursor()  # 获取一个游标
+    insertSQL = " insert into fund_manager(manager_id,manager_name,company_id,company_name,fund_id,fund_name,work_day,scale,now_best_fund_id,now_best_fund_name,now_best_fund_yields,his_best_fund_yields) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    value_list = []
     for item in data_array:
         manager_id = clean_data(item[0])
         manager_name = clean_data(item[1])
@@ -49,18 +49,22 @@ def save_fund(data_array):
         scale = clean_data(item[10])
         now_best_fund_yields = clean_data(item[7])
         now_best_fund_id = clean_data(item[8])
-        now_best_fund_name = "'"+item[9]+"'"
+        now_best_fund_name = item[9]
         his_best_fund_yields = clean_data(item[11])
         for i in range(0, len(managed_fumd_ids_array)):
             fund_id = clean_data( managed_fumd_ids_array[i])
             fund_name = clean_data(managed_fumd_names_array[i])
-            insertSQL = " insert into fund_manager(manager_id,manager_name,company_id,company_name,fund_id,fund_name,work_day,scale,now_best_fund_id,now_best_fund_name,now_best_fund_yields,his_best_fund_yields) values("\
-                         + manager_id + "," + manager_name + "," + company_id + "," + company_name + "," + fund_id + "," + fund_name + "," + work_day + "," + scale + "," + now_best_fund_id + "," + now_best_fund_name + "," + now_best_fund_yields + "," + his_best_fund_yields+")"
-            print(insertSQL)
-            cur.execute(insertSQL)
-            conn.commit()
-    cur.close()  # 关闭游标
-    conn.close()  # 释放数据库资源
+            value_list.append((manager_id,manager_name,company_id,company_name,fund_id,fund_name,work_day,scale,now_best_fund_id,now_best_fund_name,now_best_fund_yields,his_best_fund_yields))
+    try:
+        cur.executemany(insertSQL,value_list)
+        conn.commit()
+    except Exception as e:
+        print(e)
+        conn.rollback()
+        print('插入失败')
+    finally:
+     cur.close()  # 关闭游标
+     conn.close()  # 释放数据库资源
 
 # 清空表
 utils.truncate_table("fund_manager")

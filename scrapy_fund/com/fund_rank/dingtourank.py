@@ -5,16 +5,19 @@ import pymysql
 
 
 # 获取的增长率为空转为0
+from bs4 import BeautifulSoup
 from scrapy_fund.com.constant import constant
 from scrapy_fund.com.utils import utils
 
 
-def clean_data(data):
-    if data == '':
-        return 0
-    else:
-        return  data
-
+def   format_data(data,html,default_value):
+      if data is None:
+          return  default_value
+      else:
+         if  data.find(html) is None:
+             return  default_value
+         else:
+             return  data.find(html).string.replace('%','')
 
 # 通过传入的地址参数获取接口数据
 def get_fund_array(url):
@@ -28,59 +31,53 @@ def get_fund_array(url):
     response = urllib.request.urlopen(req)
     content = response.read()
     content = content.decode('utf-8')
-    data_array = eval(content[content.index("["):content.index("]") + 1])
-    return  data_array
+    return  content
 
 
-def save_fund(data_array, category):
+def save_fund(content, category):
     conn = pymysql.connect(host=constant.HOST, user=constant.USER, passwd=constant.PASSWORD, db=constant.DB,
                            port=constant.PORT, charset=constant.CHARSET)
     cur = conn.cursor()  # 获取一个游标
-    insertSQL = " insert into fund_info(fund_id,fund_name,fund_name_abbr,cal_date,net_asset_value,accumulative,oneday,oneweek,onemonth,threemonth,sixmonth,oneyear,twoyear,threeyear,thisyear,setup,category) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    insertSQL = " insert into dingtou_rank(fund_id,fund_name,net_asset_value,oneyear," \
+                "twoyear,threeyear,fiveyear,grade_no,category) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    soup = BeautifulSoup(content, 'lxml')
+    table = soup.table.tbody
     value_list = []
-    for datas in data_array:
-        data = datas.split(",")
-        fund_id = data[0]
-        fund_name =  data[1]
-        fund_name_abbr =  data[2]
-        if data[3] == '':
-            cal_date = clean_data('1900-01-01')
-        else:
-            cal_date = data[3]
-        net_asset_value = clean_data(data[4])
-        accumulative = clean_data(data[5])
-        oneday = clean_data(data[6])
-        oneweek = clean_data(data[7])
-        onemonth = clean_data(data[8])
-        threemonth = clean_data(data[9])
-        sixmonth = clean_data(data[10])
-        oneyear = clean_data(data[11])
-        twoyear = clean_data(data[12])
-        threeyear = clean_data(data[13])
-        thisyear = clean_data(data[14])
-        setup = clean_data(data[15])
-        value_list.append((fund_id,fund_name,fund_name_abbr,cal_date,net_asset_value,accumulative,oneday,oneweek,onemonth,threemonth,sixmonth,oneyear,twoyear,threeyear,thisyear,setup,category))
+    for row in table:
+        tds = row.findAll('td')
+        fund_id=format_data(tds[2],'a',0)
+        fund_name=format_data(tds[3],'a','')
+        net_asset_value=format_data(tds[5],'span',0)
+        oneyear=format_data(tds[7],'span',0)
+        twoyear=format_data(tds[8],'span',0)
+        threeyear=format_data(tds[9],'span',0)
+        fiveyear=format_data(tds[10],'span',0)
+        grade_no =format_data(tds[11],'span','0')
+        if grade_no!=0:
+           grade_no=str(len(grade_no))
+        value_list.append((fund_id, fund_name, net_asset_value, oneyear, twoyear, threeyear, fiveyear, grade_no,category))
     try:
         #print(value_list)
-        cur.executemany(insertSQL, value_list)
+        cur.executemany(insertSQL,value_list)
         conn.commit()
     except Exception as e:
-         print(e)
-         conn.rollback()
-         print('插入失败')
+        print(e)
+        conn.rollback()
+        print('插入失败')
     finally:
      cur.close()  # 关闭游标
      conn.close()  # 释放数据库资源
 
 
 # 开始组合函数
-public_url = constant.FUNRRANK_URL
-fund_category = constant.FUND_CATEGORY
+public_url = constant.DTRANK_URL
+#fund_category = {'1':'gp','2':'hh','3':'zq','4':'zs','5':'qdii'}
+fund_category = {'1':'gp','2':'hh','3':'zq','4':'zs','5':'qdii'}
 # 清空表
-utils.truncate_table("fund_info")
+utils.truncate_table("dingtou_rank")
 # 插入抓取的数据
 for category in fund_category:
-    print(public_url)
-    fund_url = public_url + category
-    fund_array = get_fund_array(fund_url)
-    save_fund(fund_array, category)
+    dingtou_url = public_url + category
+    print(dingtou_url)
+    fund_array = get_fund_array(dingtou_url)
+    save_fund(fund_array, fund_category[category])
