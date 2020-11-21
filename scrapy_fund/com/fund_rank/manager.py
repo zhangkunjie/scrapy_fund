@@ -2,17 +2,14 @@
 import time
 import urllib.request
 import pymysql
-
-
-
-# 获取的增长率为空转为0
 from scrapy_fund.com.constant import constant
 from scrapy_fund.com.utils import utils
 
 
+# 获取的增长率为空转为0
 def clean_data(data):
-    if data == '':
-        return  "--"
+    if data == '' or data=='--':
+        return  0
     else:
         return  data.strip('%')
 # 通过传入的地址参数获取接口数据
