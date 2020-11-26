@@ -59,7 +59,7 @@ FROM
 fund_info f
 where 
       f.category='qdii'
--- and   f.onemonth>0
+and   f.onemonth>0
 -- and   f.threemonth>0
 and   f.sixmonth>0
 and   f.thisyear>0

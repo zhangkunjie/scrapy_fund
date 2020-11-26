@@ -62,7 +62,7 @@ fund_ids=constant.HOLD_FUND_IDS
 pageSize='20000'
 pageIndex='1'
 #开始日期
-startDate='2020-11-03'
+startDate='2020-11-01'
 #当然日期
 endDate=time.strftime("%Y-%m-%d",time.localtime(time.time()))
 # 插入抓取的数据

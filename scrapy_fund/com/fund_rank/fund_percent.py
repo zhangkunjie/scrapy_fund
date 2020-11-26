@@ -52,9 +52,8 @@ utils.truncate_table("fund_percent")
 # 开始组合函数
 fund_ids_array = constant.HOLD_FUND_IDS
 fund_money_array=[]
-for i in range(1,len(fund_ids_array)):
-    fund_money_array.append(6000)
-#fund_money_array=[6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000, 6000]
+for i in range(1,len(fund_ids_array)+1):
+    fund_money_array.append(10000)
 manager_url = constant.GUPIAOZHANBI_URL+(',').join(fund_ids_array)
 data=get_data_array(manager_url)
 save(data,fund_money_array)
