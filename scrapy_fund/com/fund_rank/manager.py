@@ -2,11 +2,13 @@
 import time
 import urllib.request
 import pymysql
-from scrapy_fund.com.constant import constant
-from scrapy_fund.com.utils import utils
 
 
 # 获取的增长率为空转为0
+from com.constant import constant
+from com.utils import utils
+
+
 def clean_data(data):
     if data == '' or data=='--':
         return  0
@@ -66,9 +68,10 @@ def save_fund(data_array):
 # 清空表
 utils.truncate_table("fund_manager")
 # 开始组合函数
-for  i in  range(1):
-  manager_url = constant.MANAGER_URL+"&pn=2500&pi="+str(i)
+for  i in  range(50):
+  manager_url = constant.MANAGER_URL+"&pn=50&pi="+str(i)
   # 插入抓取的数据
+  print(manager_url)
   data_array = get_data_array(manager_url)
-  time.sleep(1)
+  #time.sleep(1)
   save_fund(data_array)
