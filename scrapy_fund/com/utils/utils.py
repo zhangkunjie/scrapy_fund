@@ -1,6 +1,6 @@
 import pymysql
 #清空数据库
-from com.constant import constant
+from scrapy_fund.com.constant import constant
 
 
 def truncate_table(table_name):

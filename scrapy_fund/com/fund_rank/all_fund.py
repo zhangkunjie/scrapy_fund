@@ -7,7 +7,7 @@ import pymysql
 # 获取的增长率为空转为0
 from bs4 import BeautifulSoup
 
-from com.constant import constant
+from scrapy_fund.com.constant import constant
 
 
 def   format_data(data,html,default_value):
@@ -37,14 +37,15 @@ def save_fund(fund_id_list):
     conn = pymysql.connect(host=constant.HOST, user=constant.USER, passwd=constant.PASSWORD, db=constant.DB,
                            port=constant.PORT, charset=constant.CHARSET)
     cur = conn.cursor()  # 获取一个游标
-    insertSQL = " insert into fund_ids(fund_id,info_url,topic_url,archive_url) values(%s,%s,%s,%s)"
+    insertSQL = " insert into fund_ids(fund_id,fund_name,info_url,topic_url,archive_url) values(%s,%s,%s,%s,%s)"
     value_list = []
     for fund in fund_id_list:
         fund_id=fund[0],
-        info_url=fund[1],
-        topic_url=fund[2],
-        archive_url=fund[3]
-        value_list.append((fund_id,info_url,topic_url,archive_url))
+        fund_name=fund[1]
+        info_url=fund[2],
+        topic_url=fund[3],
+        archive_url=fund[4]
+        value_list.append((fund_id,fund_name,info_url,topic_url,archive_url))
     try:
         #print(value_list)
         cur.executemany(insertSQL,value_list)
@@ -68,8 +69,8 @@ for item in fund_info_text:
     fund_text=item.contents[0].text
     fund_id=fund_text[1:7]
     fund_name=fund_text[8:]
-    info_url='http://fund.eastmoney.com/'+fund_id+'/.html'
-    topic_url = 'http://jijinba.fund.eastmoney.com/topic,' + fund_id + '/.html'
-    archive_url = 'http://fund10.eastmoney.com/' + fund_id + '/.html'
-    fund_id_list.append([fund_id,info_url,topic_url,archive_url])
+    info_url='http://fund.eastmoney.com/'+fund_id+'.html'
+    topic_url = 'http://guba.eastmoney.com/list,of' + fund_id + '.html'
+    archive_url = 'http://fundf10.eastmoney.com/' + fund_id + '.html'
+    fund_id_list.append([fund_id,fund_name,info_url,topic_url,archive_url])
 save_fund(fund_id_list)

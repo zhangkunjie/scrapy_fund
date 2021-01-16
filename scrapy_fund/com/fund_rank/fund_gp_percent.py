@@ -1,7 +1,11 @@
 # -*- coding:utf8 -*-
+import re
+import time
 import urllib.request
 import pymysql
 import demjson
+from bs4 import BeautifulSoup
+
 from scrapy_fund.com.constant import constant
 from scrapy_fund.com.utils import utils
 
@@ -17,29 +21,43 @@ def get_data_array(url):
     content = response.read()
     content = content.decode('utf-8')
     return  content
-
-def save(data,fund_money_array):
-    data_dic=dict(demjson.decode(data[5:len(data)-1]))
-    funds=data_dic.get('zcpz')
-    gpcc=data_dic.get('gpcc')
+def get_fund_gp_percent(fund_id,fund_name):
+    gp_list=[]
+    fund_scale=0
+    fund_detail_url="http://fund.eastmoney.com/"+fund_id+".html"
+    fund_detail_html=get_data_array(fund_detail_url)
+    soup = BeautifulSoup(fund_detail_html, 'lxml')
+    fund_scale_info = soup.select("div.infoOfFund>table>tr>td")[1].text
+    #基金规模
+    fund_scale_re = re.search(r'([0-9]+(\.[0-9]+)?)', fund_scale_info, re.M | re.I)
+    if fund_scale_re:
+        fund_scale=fund_scale_re.group()
+    #股票持仓
+    gp_info_tr = soup.find('li',id='position_shares').select('div.poptableWrap>table.ui-table-hover>tr')[1:]
+    if len(gp_info_tr)==10:
+        for row in gp_info_tr:
+            gp_name=row.contents[1].text
+            gp_percent=str(row.contents[3].text).replace("%",'')
+            gp_list.append([fund_id,fund_name,fund_scale,gp_name,gp_percent])
+    return gp_list
+def save():
     conn = pymysql.connect(host=constant.HOST, user=constant.USER, passwd=constant.PASSWORD, db=constant.DB,
                        port=constant.PORT, charset=constant.CHARSET)
     cur = conn.cursor()  # 获取一个游标
-    insertSQL = " insert into fund_percent(fund_id, fund_name, fund_money,gp_name,gp_percent) values(%s,%s,%s,%s,%s)"
-    value_list = []
-    for i in range(0,len(fund_money_array)):
-        fund_id=funds[i].split(',')[0]
-        fund_name=funds[i].split(',')[1]
-        fund_money=fund_money_array[i]
-        gp_item=gpcc[i]
-        for gp in gp_item:
-            gp_name=gp.split(',')[1]
-            gp_percent=gp.split(',')[2].replace('%','')
-            value_list.append((fund_id, fund_name, fund_money,gp_name,gp_percent))
-        #print(fund_id, fund_name, fund_money,gp_name,gp_percent,sep=",")
+    #先查询出基金的id和url主页地址
+    query_fund_info_sql=" select fund_id,fund_name from fund_ids"
+    insert_fund_gp_percent_sql= " insert into fund_gp_percent (fund_id,fund_name,fund_scale,gp_name,gp_percent) values(%s,%s,%s,%s,%s)"
     try:
-        cur.executemany(insertSQL, value_list)
-        conn.commit()
+       cur.execute(query_fund_info_sql)
+       fund_info_list=cur.fetchall()
+       for fund_info in fund_info_list:
+           #得到股票列表
+           fund_id=fund_info[0]
+           fund_name=fund_info[1]
+           fund_gp_percent_list=get_fund_gp_percent(fund_id,fund_name)
+           if fund_gp_percent_list!=[]:
+              cur.executemany(insert_fund_gp_percent_sql, fund_gp_percent_list)
+              conn.commit()
     except Exception as e:
         print(e)
         conn.rollback()
@@ -48,13 +66,5 @@ def save(data,fund_money_array):
         cur.close()  # 关闭游标
         conn.close()  # 释放数据库资源
 # 清空表
-utils.truncate_table("fund_percent")
-# 开始组合函数
-fund_ids_array = constant.HOLD_FUND_IDS
-fund_money_array=[]
-for i in range(1,len(fund_ids_array)+1):
-    fund_money_array.append(10000)
-manager_url = constant.GUPIAOZHANBI_URL+(',').join(fund_ids_array)
-data=get_data_array(manager_url)
-save(data,fund_money_array)
-
+utils.truncate_table("fund_gp_percent")
+save()

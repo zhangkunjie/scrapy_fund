@@ -36,7 +36,7 @@ def save_fund(data_array, category):
     conn = pymysql.connect(host=constant.HOST, user=constant.USER, passwd=constant.PASSWORD, db=constant.DB,
                            port=constant.PORT, charset=constant.CHARSET)
     cur = conn.cursor()  # 获取一个游标
-    insertSQL = " insert into fund_info(fund_id,fund_name,fund_name_abbr,cal_date,net_asset_value,accumulative,oneday,oneweek,onemonth,threemonth,sixmonth,oneyear,twoyear,threeyear,thisyear,setup,category) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    insertSQL = " insert into fund_rank(fund_id,fund_name,fund_name_abbr,cal_date,net_asset_value,accumulative,oneday,oneweek,onemonth,threemonth,sixmonth,oneyear,twoyear,threeyear,thisyear,setup,category) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
     value_list = []
     for datas in data_array:
         data = datas.split(",")
@@ -77,7 +77,7 @@ def save_fund(data_array, category):
 public_url = constant.FUNRRANK_URL
 fund_category = constant.FUND_CATEGORY
 # 清空表
-utils.truncate_table("fund_info")
+utils.truncate_table("fund_rank")
 # 插入抓取的数据
 for category in fund_category:
     print(public_url)
