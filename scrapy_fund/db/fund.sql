@@ -11,7 +11,7 @@
  Target Server Version : 80022
  File Encoding         : utf-8
 
- Date: 01/20/2021 19:03:23 PM
+ Date: 01/20/2021 19:30:37 PM
 */
 
 SET NAMES utf8mb4;
@@ -61,7 +61,7 @@ CREATE TABLE `dingtou_rank` (
 -- ----------------------------
 DROP TABLE IF EXISTS `etf_rank`;
 CREATE TABLE `etf_rank` (
-  `id` bigint NOT NULL DEFAULT '0',
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `fund_id` varchar(20) DEFAULT NULL,
   `fund_name` varchar(50) DEFAULT NULL,
   `fund_name_abbr` varchar(200) DEFAULT NULL,
@@ -76,11 +76,12 @@ CREATE TABLE `etf_rank` (
   `twoyear` float(10,4) DEFAULT NULL,
   `threeyear` float(10,4) DEFAULT NULL,
   `thisyear` float(10,4) DEFAULT NULL,
-  `setup_date` datetime DEFAULT NULL,
-  `setup` float(10,4) DEFAULT NULL,
+  `setup` float DEFAULT NULL,
+  `setup_date` date DEFAULT NULL,
   `category` varchar(10) DEFAULT NULL,
-  `score` double(255,0) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `score` double(255,0) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=354 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 --  Table structure for `fund_gp_percent`
