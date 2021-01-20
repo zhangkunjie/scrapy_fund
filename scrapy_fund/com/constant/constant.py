@@ -21,6 +21,7 @@ constant.PORT= 3306
 constant.CHARSET= 'utf8'
 constant.FUND_CATEGORY= ['gp','hh','zq','zs','bb','qdii','lof','fof']
 constant.ALLFUND_URL='http://fund.eastmoney.com/allfund.html'
+constant.ETF_RANK_URL='http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=fb&ft=ct&rs=data&gs=0&sc=zzf&st=desc&pi=1&pn=10000'
 constant.FUNRRANK_URL= 'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&pi=1&pn=10000&dx=1&ft='
 constant.MANAGER_URL= 'http://fund.eastmoney.com/Data/FundDataPortfolio_Interface.aspx?dt=14&mc=returnjson&ft=all&st=asc'
 constant.DTRANK_URL='http://fund.eastmoney.com/api/Dtshph.ashx?c=dwjz&s=desc&issale=1&page=1&psize=20000&t='
